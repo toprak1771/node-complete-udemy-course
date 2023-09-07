@@ -8,7 +8,7 @@
     "start": "nodemon app.js",
     "start-server": "node app.js"
   },
-  "author": "Maximilian Schwarzmüller",
+  "author": "Toprak Tüzün",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^1.19.4"
