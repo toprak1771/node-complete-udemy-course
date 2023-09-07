@@ -1,7 +1,7 @@
 // const mysql = require('mysql2');
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('node-complete','root','toprak1735.',{
+const sequelize = new Sequelize('node-complete','root','',{
     dialect:'mysql',
     host:'localhost',
 });
@@ -10,7 +10,7 @@ const sequelize = new Sequelize('node-complete','root','toprak1735.',{
 //     host: 'localhost',
 //     user: 'root',
 //     database: 'node-complete',
-//     password: 'toprak1735.'
+//     password: ''
 // });
 
 module.exports = sequelize;
