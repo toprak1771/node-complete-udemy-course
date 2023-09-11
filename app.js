@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 
 const errorController = require('./controllers/error');
 const sequelize = require('./util/database');
+const Product = require('./models/product');
+const User = require('./models/user');
 
 const app = express();
 const port = 3000;
@@ -32,7 +34,10 @@ app.use(errorController.get404);
 
 //app.listen(3000);
 
-sequelize.sync().then(() => {
+Product.belongsTo(User,{constraints:true,onDelete:'CASCADE'});
+User.hasMany(Product);
+
+sequelize.sync({force:true}).then(() => {
   app.listen(port,()=>{
     console.log(`Server ${port} üzerinde çalışmaya başladı`);
   });
