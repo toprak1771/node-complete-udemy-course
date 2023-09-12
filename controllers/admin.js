@@ -18,6 +18,7 @@ exports.postAddProduct = async (req, res, next) => {
     price:price,
     imageUrl:imageUrl,
     description:description,
+    userId:req.user.id,
   }).then((response) => {
     //console.log(response)
     res.redirect('/admin/products');
@@ -32,7 +33,9 @@ exports.getEditProduct = async (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  await Product.findByPk(prodId).then((product) => {
+  req.user.getProducts({where:{id:prodId}}).then((products) => {
+    console.log("products:",products);
+    const product = products[0];
     if (!product) {
       return res.redirect('/');
     }
@@ -67,7 +70,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll().then((response) => {
+  req.user.getProducts().then((response) => {
     res.render('admin/products', {
       prods: response,
       pageTitle: 'Admin Products',
