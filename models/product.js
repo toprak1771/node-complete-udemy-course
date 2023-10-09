@@ -1,54 +1,51 @@
 // const db = require('../util/database')
+
 // const Cart = require('./cart');
-const Sequelize = require('sequelize');
-const sequelize = require('../util/database');
+const getDb = require("./../util/database").getDb;
+const mongoDb = require('mongodb');
 
-
-// module.exports = class Product {
-//    constructor(id, title, imageUrl, description, price) {
-//      this.id = id;
-//      this.title = title;
-//      this.imageUrl = imageUrl;
-//      this.description = description;
-//      this.price = price;
-//    }
-
-const Product =  sequelize.define('Product',{
-  id:{
-    type:Sequelize.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-    allowNull:false,
-  },
-  title:Sequelize.STRING,
-  price:{
-    type:Sequelize.DOUBLE,
-    allowNull:false,
-  },
-  imageUrl:{
-    type:Sequelize.STRING,
-    allowNull:false
-  },
-  description:{
-    type:Sequelize.STRING,
-    allowNull:false
+class Product {
+  constructor(title, imageUrl, description, price) {
+    this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.price = price;
   }
-});
+
+  save() {
+    const db = getDb();
+    return db
+      .collection("products")
+      .insertOne(this)
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err));
+  }
+
+  fetchAll() {
+    const db = getDb();
+    return db
+      .collection("products")
+      .find({})
+      .toArray()
+      .then((products) => {
+        console.log(products);
+        return products;
+      })
+      .catch((err) => console.log(err));
+  }
+
+  findById(id) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .find({ _id: new mongoDb.ObjectId(id) })
+      .next()
+      .then((product) => {
+        console.log("product:", product);
+        return product;
+      })
+      .catch((err) => console.log(err));
+  }
+}
 
 module.exports = Product;
-//   save() {
-//    return db.execute('INSERT INTO products (title,price,description,imageUrl) VALUES (?,?,?,?)',[this.title,this.price,this.description,this.imageUrl]);
-//   }
-
-//   static deleteById(id) {
-   
-//   }
-
-//   static fetchAll() {
-//     return db.execute('SELECT * FROM products')
-//   }
-
-//   static findById(id) {
-//     return db.execute('SELECT * FROM products WHERE id = ?',[id])
-//   }
-// };
