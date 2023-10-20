@@ -98,6 +98,35 @@ class User {
       .catch((err) => console.log(err));
   }
 
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          userId: new mongoDb.ObjectId(this._id),
+        };
+        return db
+          .collection("orders")
+          .insertOne(order)
+          .then((result) => {
+            return db
+              .collection("users")
+              .updateOne(
+                { _id: new mongoDb.ObjectId(this._id) },
+                {
+                  $set: {
+                    cart: { items: [] },
+                  },
+                }
+              )
+              .then(() => console.log("Order completed."));
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  }
+
   deleteItemFromCart(productId) {
     const db = getDb();
     const updatedItems = this?.cart?.items?.filter(

@@ -137,49 +137,12 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
-// exports.postOrder = (req, res, next) => {
-//   let fetchedCart;
-//   req.user
-//     .getCart()
-//     .then((cart) => {
-//       fetchedCart = cart;
-//       return cart.getProducts();
-//     })
-//     .then((products) => {
-//       //farklı yol --->
-//       // return req.user
-//       // .createOrder()
-//       // .then(order => {
-//       //   return order.addProducts(
-//       //     products.map(product => {
-//       //       product.orderItem = { quantity: product.cartItem.quantity };
-//       //       return product;
-//       //     })
-//       //   );
-//       // })
-//       // .catch(err => console.log(err));
-
-//       req.user.createOrder().then((order) => {
-//         products.forEach((product) => {
-//           return order.addProduct(product, {
-//             through: { quantity: product.CartItem.quantity },
-//           });
-//         });
-//       });
-//     })
-//     .then((result) => {
-//       //farklı yol --->
-//       // return fetchedCart.setProducts(null);
-
-//       console.log("cart:", fetchedCart);
-//       return CartItem.destroy({ where: { CartId: fetchedCart.id } });
-//     })
-//     .then((lastResult) => {
-//       console.log("order has completed successfully.");
-//       res.redirect("/orders");
-//     })
-//     .catch((err) => console.log(err));
-// };
+exports.postOrder = (req, res, next) => {
+  req.user.addOrder().then((result) => {
+    console.log(result);
+    console.log("order operation is completed.")
+  }).catch((err) => console.log(err))
+}
 
 // exports.getOrders = (req, res, next) => {
 //   req.user
