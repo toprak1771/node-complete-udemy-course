@@ -127,6 +127,19 @@ class User {
       .catch((err) => console.log(err));
   }
 
+  getOrder() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ userId: new mongoDb.ObjectId(this._id) })
+      .toArray()
+      .then((orders) => {
+        console.log("orders:",orders);
+        return orders
+      })
+      .catch((err) => console.log(err))
+  }
+
   deleteItemFromCart(productId) {
     const db = getDb();
     const updatedItems = this?.cart?.items?.filter(

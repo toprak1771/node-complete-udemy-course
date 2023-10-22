@@ -138,25 +138,25 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  req.user.addOrder().then((result) => {
-    console.log(result);
-    console.log("order operation is completed.")
+  req.user
+    .addOrder()
+    .then((result) => {
+      console.log(result);
+      console.log("order operation is completed.");
+    })
+    .catch((err) => console.log(err));
+};
+
+exports.getOrders = (req, res, next) => {
+  req.user.getOrder().then((order) => {
+    console.log("order:",order);
+    res.render("shop/orders", {
+      path: "/orders",
+      orders: order,
+      pageTitle: "Your Orders",
+    });
   }).catch((err) => console.log(err))
 }
-
-// exports.getOrders = (req, res, next) => {
-//   req.user
-//     .getOrders({ include: ["Products"] })
-//     .then((orders) => {
-//       console.log("orders:",orders);
-//       res.render("shop/orders", {
-//         path: "/orders",
-//         orders: orders,
-//         pageTitle: "Your Orders",
-//       });
-//     })
-//     .catch((err) => console.log(err));
-// };
 
 // exports.getCheckout = (req, res, next) => {
 //   res.render("shop/checkout", {
