@@ -13,7 +13,13 @@ exports.postAddProduct = async (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(title, imageUrl, description, price, null, req.user._id);
+  const product = new Product({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+    userId:req.user._id,
+  });
   await product
     .save()
     .then((response) => {
@@ -26,14 +32,12 @@ exports.postAddProduct = async (req, res, next) => {
 };
 
 exports.getEditProduct = async (req, res, next) => {
-  const product = new Product();
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  product
-    .findById(prodId)
+  await Product.findById(prodId)
     .then((product) => {
       console.log("productsAdmin:", product);
       if (!product) {
@@ -51,21 +55,19 @@ exports.getEditProduct = async (req, res, next) => {
     });
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  const product = new Product(
-    updatedTitle,
-    updatedImageUrl,
-    updatedDesc,
-    updatedPrice,
-    prodId
-  );
-  product
-    .save()
+  const product = {
+    title: updatedTitle,
+    price: updatedPrice,
+    description: updatedDesc,
+    imageUrl: updatedImageUrl,
+  };
+  await Product.updateOne({ _id: prodId }, product)
     .then(() => {
       console.log("update successfully.");
       res.redirect("/admin/products");
@@ -74,9 +76,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  const product = new Product();
-  product
-    .fetchAll()
+  Product.find({})
     .then((response) => {
       res.render("admin/products", {
         prods: response,
@@ -89,9 +89,12 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
+exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteById(prodId).then((response) => {
+  console.log("prodID:", prodId);
+  await Product.findByIdAndDelete(prodId)
+    .then((response) => {
+      console.log("response:", response);
       console.log("Product deleted!!!");
       res.redirect("/admin/products");
     })
