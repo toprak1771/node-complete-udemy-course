@@ -1,19 +1,103 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 const CartItem = require("../models/cart-item");
+const redis = require("redis");
+
+//redis
+var client = redis.createClient({
+  legacyMode: true,
+});
+let redisError;
+client
+  .connect()
+  .then(() => {
+    // client.set("user_name", "Toprak", (error, message) => {
+    //   if (error) {
+    //     console.log("error:", error);
+    //   }
+    //   console.log("Message:", message);
+    // });
+    // //GET
+    // client.get("user_name", (error, message) => {
+    //   if (error) {
+    //     console.log("error:", error);
+    //   }
+    //   console.log("Message:", message);
+    // });
+  })
+  .catch((err) => {
+    console.log("redis_error_main:", err);
+    redisError = err;
+  });
 
 exports.getProducts = async (req, res, next) => {
-  await Product.findAll()
-    .then((response) => {
-      res.render("shop/product-list", {
-        prods: response,
-        pageTitle: "All Products",
-        path: "/products",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+  console.log("redisError=", typeof redisError);
+  if (redisError == null || !redisError) {
+    client.keys("Product*", (err, keys) => {
+      console.log("keys:", keys);
+      if (err) return console.log(err);
+      if (keys.length > 0) {
+        const productList = [];
+        keys.forEach((redisKey) => {
+          //console.log("redisKey:", redisKey);
+          client.get(redisKey, (err, product) => {
+            productList.push(JSON.parse(product));
+            if (productList.length === keys.length) {
+              console.log("productList:", productList);
+              res.render("shop/product-list", {
+                prods: productList,
+                pageTitle: "All Products",
+                path: "/products",
+              });
+            }
+          });
+        });
+      } else {
+        let counter = 0;
+        Product.findAll().then((response) => {
+          console.log("response:", response);
+          response.forEach((product) => {
+            //console.log("productTitle:", product.title);
+            product.fullName = product.title + "" + product.description;
+            //console.log("product:",product);
+            let productName = "Product" + product.id;
+            console.log("productkey:", productName);
+            client.get(productName, (err, key_product) => {
+              if (err) {
+                console.log("err:", err);
+              }
+              if (key_product == null) {
+                let data = JSON.stringify(product);
+                console.log("data:", data);
+                client.set(productName, data, (err, message) => {
+                  console.log("message:", message);
+                });
+              } else {
+                console.log(JSON.parse(key_product));
+              }
+            });
+          });
+          res.render("shop/product-list", {
+            prods: response,
+            pageTitle: "All Products",
+            path: "/products",
+          });
+        });
+      }
     });
+  } else if (redisError) {
+    await Product.findAll()
+      .then((response) => {
+        res.render("shop/product-list", {
+          prods: response,
+          pageTitle: "All Products",
+          path: "/products",
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 };
 
 exports.getProduct = async (req, res, next) => {
@@ -32,6 +116,7 @@ exports.getProduct = async (req, res, next) => {
 };
 
 exports.getIndex = async (req, res, next) => {
+  console.log("redisError=", typeof redisError);
   // await Cart.findByPk(1).then((cart) => {
   //   cart.getUser().then((user)=> {
   //     console.log("user:",user)
@@ -205,7 +290,7 @@ exports.getOrders = (req, res, next) => {
   req.user
     .getOrders({ include: ["Products"] })
     .then((orders) => {
-      console.log("orders:",orders);
+      console.log("orders:", orders);
       res.render("shop/orders", {
         path: "/orders",
         orders: orders,
