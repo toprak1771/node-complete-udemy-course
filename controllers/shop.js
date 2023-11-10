@@ -31,7 +31,6 @@ client
   });
 
 exports.getProducts = async (req, res, next) => {
-  console.log("redisError=", typeof redisError);
   if (redisError == null || !redisError) {
     client.keys("Product*", (err, keys) => {
       console.log("keys:", keys);
