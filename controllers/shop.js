@@ -2,13 +2,14 @@ const Product = require("../models/product");
 //const Cart = require("../models/cart");
 //const CartItem = require("../models/cart-item");
 const User = require("../models/user");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.find()
     // .select("title price -_id")
     // .populate("userId", "name")
     .then((response) => {
-      //console.log("products:", response);
+      console.log("products:", response);
       res.render("shop/product-list", {
         prods: response,
         pageTitle: "All Products",
@@ -50,10 +51,15 @@ exports.getIndex = async (req, res, next) => {
     });
 };
 
-exports.getCart = async (req, res, next) => {
-  await req.user
-    .getCart()
-    .then((products) => {
+exports.getCart =  (req, res, next) => {
+   req.user
+    .populate("cart.items.productId")
+    // await req.user
+    //   .getCart()  this is also work but long path
+    .then((user) => {
+      console.log("user:",user);
+      const products = user.cart.items;
+      console.log("products:",products);
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
@@ -67,8 +73,9 @@ exports.postCart = async (req, res, next) => {
   const prodId = req.body.productId;
   await Product.findById(prodId)
     .then((product) => {
-      console.log("product:",product);
-      return req.user.addToCart(product)
+      console.log("product:", product);
+      return req.user
+        .addToCart(product)
         .then((result) => {
           console.log("Product added successfully.");
           res.redirect("/cart");
@@ -81,8 +88,9 @@ exports.postCart = async (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
-    .deleteItemFromCart(prodId)
+    .removeCart(prodId)
     .then((result) => {
+      console.log("result:", result);
       console.log("Product has been deleted in cart");
       res.redirect("/cart");
     })
@@ -95,18 +103,18 @@ exports.postOrder = (req, res, next) => {
     .then((result) => {
       console.log(result);
       console.log("order operation is completed.");
+      res.redirect("/orders");
     })
     .catch((err) => console.log(err));
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrder()
-    .then((order) => {
-      console.log("order:", order);
+  Order.find({ "user.userId": req.user._id })
+    .then((orders) => {
+      console.log("orders:", orders);
       res.render("shop/orders", {
         path: "/orders",
-        orders: order,
+        orders: orders,
         pageTitle: "Your Orders",
       });
     })
