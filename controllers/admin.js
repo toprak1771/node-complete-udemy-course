@@ -5,10 +5,12 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    isAuthenticated:req.session.loggedIn ?? false
   });
 };
 
 exports.postAddProduct = async (req, res, next) => {
+  console.log("req.session.user._id:",req.session.user._id);
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
@@ -18,7 +20,7 @@ exports.postAddProduct = async (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
-    userId:req.user._id,
+    userId:req.session.user._id,
   });
   await product
     .save()
@@ -48,6 +50,7 @@ exports.getEditProduct = async (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => {
@@ -82,6 +85,7 @@ exports.getProducts = (req, res, next) => {
         prods: response,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => {

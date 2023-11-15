@@ -5,15 +5,17 @@ const User = require("../models/user");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
+  console.log("loggedIn:",req.session.loggedIn);
   Product.find()
     // .select("title price -_id")
     // .populate("userId", "name")
     .then((response) => {
-      console.log("products:", response);
+      //console.log("products:", response);
       res.render("shop/product-list", {
         prods: response,
         pageTitle: "All Products",
         path: "/products",
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => {
@@ -30,6 +32,7 @@ exports.getProduct = async (req, res, next) => {
         product: response,
         pageTitle: response.title,
         path: "/products",
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => {
@@ -44,6 +47,7 @@ exports.getIndex = async (req, res, next) => {
         prods: response,
         pageTitle: "Shop",
         path: "/",
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => {
@@ -52,7 +56,8 @@ exports.getIndex = async (req, res, next) => {
 };
 
 exports.getCart =  (req, res, next) => {
-   req.user
+  console.log("req.session.user:",req.session.user);
+   req.session.user
     .populate("cart.items.productId")
     // await req.user
     //   .getCart()  this is also work but long path
@@ -64,6 +69,7 @@ exports.getCart =  (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => console.log(err));
@@ -74,7 +80,7 @@ exports.postCart = async (req, res, next) => {
   await Product.findById(prodId)
     .then((product) => {
       console.log("product:", product);
-      return req.user
+      return req.session.user
         .addToCart(product)
         .then((result) => {
           console.log("Product added successfully.");
@@ -87,18 +93,19 @@ exports.postCart = async (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user
+  req.session.user
     .removeCart(prodId)
     .then((result) => {
       console.log("result:", result);
       console.log("Product has been deleted in cart");
       res.redirect("/cart");
+      
     })
     .catch((err) => console.log(err));
 };
 
 exports.postOrder = (req, res, next) => {
-  req.user
+  req.session.user
     .addOrder()
     .then((result) => {
       console.log(result);
@@ -109,13 +116,14 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({ "user.userId": req.user._id })
+  Order.find({ "user.userId": req.session.user._id })
     .then((orders) => {
       console.log("orders:", orders);
       res.render("shop/orders", {
         path: "/orders",
         orders: orders,
         pageTitle: "Your Orders",
+        isAuthenticated:req.session.loggedIn ?? false
       });
     })
     .catch((err) => console.log(err));
