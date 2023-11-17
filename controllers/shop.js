@@ -6,6 +6,7 @@ const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   console.log("loggedIn:",req.session.loggedIn);
+  console.log("req.session:",req.session);
   Product.find()
     // .select("title price -_id")
     // .populate("userId", "name")
@@ -57,7 +58,7 @@ exports.getIndex = async (req, res, next) => {
 
 exports.getCart =  (req, res, next) => {
   console.log("req.session.user:",req.session.user);
-   req.session.user
+   req.user
     .populate("cart.items.productId")
     // await req.user
     //   .getCart()  this is also work but long path
@@ -80,7 +81,7 @@ exports.postCart = async (req, res, next) => {
   await Product.findById(prodId)
     .then((product) => {
       console.log("product:", product);
-      return req.session.user
+      return req.user
         .addToCart(product)
         .then((result) => {
           console.log("Product added successfully.");
@@ -93,7 +94,7 @@ exports.postCart = async (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.session.user
+  req.user
     .removeCart(prodId)
     .then((result) => {
       console.log("result:", result);
@@ -105,7 +106,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  req.session.user
+  req.user
     .addOrder()
     .then((result) => {
       console.log(result);

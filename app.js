@@ -27,16 +27,7 @@ const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use((req, res, next) => {
-//   User.findById("6548b7e2a4aeb03d3d9dc642")
-//     .then((user) => {
-//       console.log("user:", user);
-//       req.user = user;
-//       console.log("req.user:", req.user);
-//       next();
-//     })
-//     .catch((err) => console.log(err));
-// });
+
 
 const store = new MongoDbStore({
   uri:process.env.DATABASE,
@@ -49,6 +40,21 @@ app.use(session({
   saveUninitialized:true,
   store:store
 })); 
+
+app.use((req, res, next) => {
+  if(!req.session.user){
+    return next();
+  }
+  
+   User.findById(req.session.user._id)
+     .then((user) => {
+       //console.log("user:", user);
+       req.user = user;
+       //console.log("req.user:", req.user);
+       next();
+     })
+     .catch((err) => console.log(err));
+ });
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
