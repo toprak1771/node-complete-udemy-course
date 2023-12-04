@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
   user: {
-    name: {
+    mail: {
       type: String,
       required: true,
     },

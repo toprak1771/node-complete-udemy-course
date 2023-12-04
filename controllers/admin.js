@@ -1,3 +1,4 @@
+const product = require("../models/product");
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -5,12 +6,12 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
-    isAuthenticated:req.session.loggedIn ?? false
+    isAuthenticated: req.session.loggedIn ?? false,
   });
 };
 
 exports.postAddProduct = async (req, res, next) => {
-  console.log("req.session.user._id:",req.session.user._id);
+  console.log("req.session.user._id:", req.session.user._id);
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
@@ -20,7 +21,7 @@ exports.postAddProduct = async (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
-    userId:req.session.user._id,
+    userId: req.session.user._id,
   });
   await product
     .save()
@@ -45,12 +46,16 @@ exports.getEditProduct = async (req, res, next) => {
       if (!product) {
         return res.redirect("/");
       }
+      if (product.userId.toString() !== req.session.user._id.toString()) {
+        req.flash("errorMessage", "Authorization Error");
+        return res.redirect("/admin/products");
+      }
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
@@ -79,13 +84,17 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find({})
+  const message = req.flash("errorMessage");
+  console.log("message:", message);
+
+  Product.find({userId:req.session.user._id})
     .then((response) => {
       res.render("admin/products", {
         prods: response,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
+        errorMessage: message.length > 0 ? message : "",
       });
     })
     .catch((err) => {
@@ -95,12 +104,22 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
-  console.log("prodID:", prodId);
-  await Product.findByIdAndDelete(prodId)
-    .then((response) => {
-      console.log("response:", response);
-      console.log("Product deleted!!!");
-      res.redirect("/admin/products");
+  await Product.findById(prodId)
+    .then(async (product) => {
+      if (product.userId.toString() !== req.session.user._id.toString()) {
+        req.flash("errorMessage", "Authorization Error");
+        return res.redirect("/admin/products");
+      } else {
+        await Product.findByIdAndDelete(prodId)
+          .then((response) => {
+            console.log("response:", response);
+            console.log("Product deleted!!!");
+            return res.redirect("/admin/products");
+          })
+          .catch((err) => console.log(err));
+      }
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+    });
 };

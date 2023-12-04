@@ -6,12 +6,16 @@ const session = require('express-session');
 require("dotenv").config();
 const errorController = require("./controllers/error");
 const MongoDbStore = require("connect-mongodb-session")(session);
+const { doubleCsrf } = require('csrf-csrf');
+const flash = require('connect-flash');
 const User = require("./models/user");
 
 const app = express();
 // const port = 3000;
 app.set("view engine", "ejs");
 app.set("views", "views");
+
+
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -56,6 +60,23 @@ app.use((req, res, next) => {
      .catch((err) => console.log(err));
  });
 
+ app.use(flash());
+//  const {
+//   generateToken, // Use this in your routes to provide a CSRF hash + token cookie and token.
+//   doubleCsrfProtection, // This is the default CSRF protection middleware.
+// } = doubleCsrf({
+//   cookieName: "__Host-psifi.connect-sid",
+//   cookieOptions: {
+//     secure: true,
+//   },
+//   getSecret: () => 'supersecret',
+//   getTokenFromRequest: req => req.body.csrfToken,
+// });
+// app.use(doubleCsrfProtection);
+// app.use((req,res,next) => {
+//   res.locals.csrfToken = generateToken(req,res);
+//   next();
+// });
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);

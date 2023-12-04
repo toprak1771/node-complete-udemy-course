@@ -6,15 +6,17 @@ const Order = require("./order");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
   mail: {
     type: String,
     required: true,
     unique: true,
   },
+  password:{
+    type:String,
+    required:true
+  },
+  resetToken:String,
+  resetTokenExpiration:Date,
   cart: {
     items: [
       {
@@ -99,7 +101,7 @@ userSchema.methods.addOrder = async function () {
   let products = this.cart.items;
   const productsIds = products.map((product) => product.productId);
   const user = {
-    name: this.name,
+    mail: this.mail,
     userId: this._id,
   };
   console.log("productsIds:", productsIds);

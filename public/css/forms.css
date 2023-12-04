@@ -21,3 +21,23 @@
 .form-control textarea:focus {
   outline-color: #00695c;
 }
+
+.user-message {
+  margin: auto;
+  width: 90%;
+  border: 1px solid rgb(62, 62, 247);
+  padding: 1rem;
+  border-radius: 3px;
+  background: #b9c9ff;
+  text-align: center;
+}
+
+.user-message-error {
+  border-color: red;
+  background: rgb(255, 176, 176);
+}
+
+.reset-password{
+  text-align: center;
+  margin-top: 2rem;
+}
