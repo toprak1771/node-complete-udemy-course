@@ -1,37 +1,68 @@
 const product = require("../models/product");
 const Product = require("../models/product");
+const { validationResult } = require("express-validator");
+const mongoose = require('mongoose');
 
 exports.getAddProduct = (req, res, next) => {
+  const errors = validationResult(req);
+  console.log("errors:", errors.array());
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
     isAuthenticated: req.session.loggedIn ?? false,
+    errorMessage: '',
+    validationErrors: [],
+    oldInput: { title: "", imageUrl: "", price: "", description: "" },
   });
 };
 
 exports.postAddProduct = async (req, res, next) => {
-  console.log("req.session.user._id:", req.session.user._id);
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product({
-    title: title,
-    price: price,
-    description: description,
-    imageUrl: imageUrl,
-    userId: req.session.user._id,
-  });
-  await product
-    .save()
-    .then((response) => {
-      console.log(response);
-      res.redirect("/admin/products");
-    })
-    .catch((err) => {
-      console.log(err);
+  const errors = validationResult(req);
+  console.log("errors:", errors.array());
+  if (!errors.isEmpty()) {
+    res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      isAuthenticated: req.session.loggedIn ?? false,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+      oldInput: {
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description,
+      },
     });
+  } else {
+    console.log("req.session.user._id:", req.session.user._id);
+    const product = new Product({
+      //_id:new mongoose.Types.ObjectId('6548b89441e44463dbcb2e28'),
+      title: title,
+      price: price,
+      description: description,
+      imageUrl: imageUrl,
+      userId: req.session.user._id,
+    });
+    await product
+      .save()
+      .then((response) => {
+        console.log(response);
+        res.redirect("/admin/products");
+      })
+      .catch((err) => {
+        console.log('An error occured!');
+        console.log(err.message);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
+  }
 };
 
 exports.getEditProduct = async (req, res, next) => {
@@ -59,7 +90,11 @@ exports.getEditProduct = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -80,14 +115,20 @@ exports.postEditProduct = async (req, res, next) => {
       console.log("update successfully.");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
   const message = req.flash("errorMessage");
   console.log("message:", message);
 
-  Product.find({userId:req.session.user._id})
+  Product.find({ userId: req.session.user._id })
     .then((response) => {
       res.render("admin/products", {
         prods: response,
@@ -98,7 +139,11 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -120,6 +165,10 @@ exports.postDeleteProduct = async (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };

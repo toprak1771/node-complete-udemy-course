@@ -14,7 +14,6 @@ const orderSchema = new Schema({
       required: true,
     },
   },
-
   products: [
     {
       product: {

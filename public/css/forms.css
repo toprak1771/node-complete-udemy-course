@@ -41,3 +41,7 @@
   text-align: center;
   margin-top: 2rem;
 }
+
+.invalid {
+  border-color: red !important;
+}

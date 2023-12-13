@@ -20,7 +20,11 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -37,7 +41,11 @@ exports.getProduct = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -52,7 +60,11 @@ exports.getIndex = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -73,7 +85,13 @@ exports.getCart =  (req, res, next) => {
         isAuthenticated:req.session.loggedIn ?? false
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postCart = async (req, res, next) => {
@@ -89,7 +107,13 @@ exports.postCart = async (req, res, next) => {
         })
         .catch((err) => console.log(err));
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
@@ -102,7 +126,13 @@ exports.postCartDeleteProduct = (req, res, next) => {
       res.redirect("/cart");
       
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postOrder = (req, res, next) => {
@@ -113,7 +143,13 @@ exports.postOrder = (req, res, next) => {
       console.log("order operation is completed.");
       res.redirect("/orders");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getOrders = (req, res, next) => {
@@ -127,7 +163,13 @@ exports.getOrders = (req, res, next) => {
         isAuthenticated:req.session.loggedIn ?? false
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 // exports.getCheckout = (req, res, next) => {

@@ -66,7 +66,13 @@ exports.postLogin = (req, res, next) => {
             });
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log('An error occured!');
+        console.log(err.message);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
   }
 };
 
@@ -84,6 +90,7 @@ exports.getSignup = (req, res, next) => {
     pageTitle: "Signup",
     isAuthenticated: false,
     errorMessage: "",
+    validationErrors:[]
   });
 };
 
@@ -96,6 +103,7 @@ exports.postSignup = (req, res, next) => {
       pageTitle: "Signup",
       isAuthenticated: false,
       errorMessage: errors.array()[0].msg,
+      validationErrors:errors.array()
     });
   } else {
     const email = req.body.email;
@@ -141,8 +149,11 @@ exports.postSignup = (req, res, next) => {
           });
       })
       .catch((err) => {
-        console.log(err);
-        res.redirect("/signup");
+        console.log('An error occured!');
+        console.log(err.message);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       });
   }
 };
@@ -199,7 +210,11 @@ exports.postReset = async (req, res, next) => {
           });
       })
       .catch((err) => {
-        console.log(err);
+        console.log('An error occured!');
+        console.log(err.message);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       });
   });
 };
@@ -227,7 +242,11 @@ exports.getNewPassword = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -257,6 +276,10 @@ exports.postNewPassword = (req, res, next) => {
         });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('An error occured!');
+      console.log(err.message);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
