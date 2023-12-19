@@ -3,24 +3,22 @@ const Product = require("../models/product");
 //const CartItem = require("../models/cart-item");
 const User = require("../models/user");
 const Order = require("../models/order");
+const path = require('path');
+const fs = require('fs');
 
 exports.getProducts = (req, res, next) => {
-  console.log("loggedIn:",req.session.loggedIn);
-  console.log("req.session:",req.session);
   Product.find()
-    // .select("title price -_id")
-    // .populate("userId", "name")
     .then((response) => {
-      //console.log("products:", response);
+      console.log('response:',response);
       res.render("shop/product-list", {
         prods: response,
         pageTitle: "All Products",
         path: "/products",
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -37,11 +35,11 @@ exports.getProduct = async (req, res, next) => {
         product: response,
         pageTitle: response.title,
         path: "/products",
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -56,11 +54,11 @@ exports.getIndex = async (req, res, next) => {
         prods: response,
         pageTitle: "Shop",
         path: "/",
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -68,25 +66,25 @@ exports.getIndex = async (req, res, next) => {
     });
 };
 
-exports.getCart =  (req, res, next) => {
-  console.log("req.session.user:",req.session.user);
-   req.user
+exports.getCart = (req, res, next) => {
+  console.log("req.session.user:", req.session.user);
+  req.user
     .populate("cart.items.productId")
     // await req.user
     //   .getCart()  this is also work but long path
     .then((user) => {
-      console.log("user:",user);
+      console.log("user:", user);
       const products = user.cart.items;
-      console.log("products:",products);
+      console.log("products:", products);
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -108,7 +106,7 @@ exports.postCart = async (req, res, next) => {
         .catch((err) => console.log(err));
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -124,10 +122,9 @@ exports.postCartDeleteProduct = (req, res, next) => {
       console.log("result:", result);
       console.log("Product has been deleted in cart");
       res.redirect("/cart");
-      
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -144,7 +141,7 @@ exports.postOrder = (req, res, next) => {
       res.redirect("/orders");
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -160,11 +157,11 @@ exports.getOrders = (req, res, next) => {
         path: "/orders",
         orders: orders,
         pageTitle: "Your Orders",
-        isAuthenticated:req.session.loggedIn ?? false
+        isAuthenticated: req.session.loggedIn ?? false,
       });
     })
     .catch((err) => {
-      console.log('An error occured!');
+      console.log("An error occured!");
       console.log(err.message);
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -178,3 +175,17 @@ exports.getOrders = (req, res, next) => {
 //     pageTitle: "Checkout",
 //   });
 // };
+
+exports.getInvoice = (req,res,next) => {
+  const orderId = req.params.orderId;
+  const invoiceName = 'invoice-' + orderId + '.pdf';
+  const invoicePath = path.join('data','invoices',invoiceName);
+  fs.readFile(invoicePath,(err,data) => {
+    if(err){
+      return next(err)
+    }
+    res.setHeader('Content-Type','application/pdf');
+    res.setHeader('Content-Disposition','inline;filename="' + invoiceName +'"');
+    res.send(data);
+  })
+}

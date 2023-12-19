@@ -14,6 +14,10 @@
                             <h1><%= product.product.title %></h1>
                             <h2>Quantity: <%= product.quantity %></h2>
                         </li>
+                        <div class="mt-3 pt-5">
+                            <a href="/orders/<%= order._id  %>" class="btn pt-3">Invoice</a>
+                        </div>
+                        
                         <% }) %>
                     <% }) %>
                 </ul>
